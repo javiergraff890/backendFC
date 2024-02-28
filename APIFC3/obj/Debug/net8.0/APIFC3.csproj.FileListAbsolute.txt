@@ -136,3 +136,4 @@ C:\Desarrollo\APIFC3\APIFC3\obj\Debug\net8.0\APIFC3.genruntimeconfig.cache
 C:\Desarrollo\APIFC3\APIFC3\obj\Debug\net8.0\ref\APIFC3.dll
 C:\Desarrollo\APIFC3\APIFC3\bin\Debug\net8.0\BCrypt.Net-Core.dll
 C:\Desarrollo\APIFC3\APIFC3\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Desarrollo\APIFC3\APIFC3\obj\Debug\net8.0\APIFC3.sourcelink.json

@@ -32,5 +32,22 @@ namespace APIFC3.Controllers
                 return NotFound();
             return Ok(caja);
         }
+
+        [HttpDelete("{id}")] 
+        public ActionResult Delete(int id) {
+            //revisar este warning, si bien yo envio siempre un id correcto alguna mala llamada puede romper la api
+            var caja = _context.Cajas.Find(id);
+
+            if (caja != null)
+            {
+                _context.Cajas.Remove(caja);
+                _context.SaveChanges();
+                return Ok();
+            } else
+            {
+                return NoContent();
+            }
+                 
+        }
     }
 }
