@@ -2,6 +2,7 @@
 using APIFC3.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace APIFC3.Controllers
 {
@@ -47,7 +48,38 @@ namespace APIFC3.Controllers
             {
                 return NoContent();
             }
-                 
+        }
+
+        [HttpPost]
+        public ActionResult NuevaCaja(CreacionCaja c)
+        {
+            int entidadesAfectadas = 0;
+            try
+            {
+                _context.Cajas.Add(c.caja);
+                entidadesAfectadas += _context.SaveChanges();
+                Movimiento m = new Movimiento();
+                m.Concepto = "Saldo inicial";
+                m.Valor = c.caja.Saldo;
+                m.IdCaja = c.caja.Id;
+                m.UserId = c.idUsuario;
+                _context.Movimientos.Add(m);
+                entidadesAfectadas += _context.SaveChanges();
+                Debug.WriteLine(entidadesAfectadas);
+                return Ok();
+            } catch(Exception e)
+            {
+                string mensaje ="";
+                if (entidadesAfectadas == 0)
+                    mensaje = "No se inserto ningun elemento";
+                else if (entidadesAfectadas == 1)
+                    mensaje = "no se pudo insertar el movimiento inicial";
+                
+                return StatusCode(500, "Error interno del servidor : "+mensaje);
+            }
+            
+            
+
         }
     }
 }
