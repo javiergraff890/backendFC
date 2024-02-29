@@ -30,7 +30,7 @@ public partial class FlujoCajaContext : DbContext
     {
         modelBuilder.Entity<Caja>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Caja__3213E83F3BE64ABB");
+            entity.HasKey(e => e.Id).HasName("PK__Caja__3213E83FAA21B2B9");
 
             entity.ToTable("Caja");
 
@@ -42,11 +42,16 @@ public partial class FlujoCajaContext : DbContext
             entity.Property(e => e.Saldo)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("saldo");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Cajas)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Caja__UserId__1BC821DD");
         });
 
         modelBuilder.Entity<Movimiento>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Movimien__3213E83F69C8B885");
+            entity.HasKey(e => e.Id).HasName("PK__Movimien__3213E83F65AA1B84");
 
             entity.ToTable("Movimiento");
 
@@ -63,21 +68,16 @@ public partial class FlujoCajaContext : DbContext
             entity.HasOne(d => d.IdCajaNavigation).WithMany(p => p.Movimientos)
                 .HasForeignKey(d => d.IdCaja)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Movimient__idCaj__05D8E0BE");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Movimientos)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Movimient__UserI__06CD04F7");
+                .HasConstraintName("FK__Movimient__idCaj__1EA48E88");
         });
 
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Usuario__1788CC4C64177911");
+            entity.HasKey(e => e.UserId).HasName("PK__Usuario__1788CC4C6418DB47");
 
             entity.ToTable("Usuario");
 
-            entity.HasIndex(e => e.UserName, "UQ__Usuario__C9F2845616B3A15A").IsUnique();
+            entity.HasIndex(e => e.UserName, "UQ__Usuario__C9F2845615276AB1").IsUnique();
 
             entity.Property(e => e.Password)
                 .HasMaxLength(80)

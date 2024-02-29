@@ -13,9 +13,5 @@ public partial class Movimiento
 
     public int IdCaja { get; set; }
 
-    public int UserId { get; set; }
-
     public virtual Caja IdCajaNavigation { get; set; } = null!;
-
-    public virtual Usuario User { get; set; } = null!;
 }

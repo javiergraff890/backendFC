@@ -11,5 +11,9 @@ public partial class Caja
 
     public decimal Saldo { get; set; }
 
+    public int UserId { get; set; }
+
     public virtual ICollection<Movimiento> Movimientos { get; set; } = new List<Movimiento>();
+
+    public virtual Usuario? User { get; set; } = null!;
 }

@@ -34,17 +34,23 @@ namespace APIFC3.Controllers
             return Ok(caja);
         }
 
-        [HttpDelete("{id}/{idUsuario}")] 
+        [HttpDelete("{id}")] 
         public ActionResult Delete(int id, int idUsuario) {
             //revisar este warning, si bien yo envio siempre un id correcto alguna mala llamada puede romper la api
             var caja = _context.Cajas.Find(id);
 
+            //si quiero eliminar una caja debo eliminar a todos los movimientos
             if (caja != null)
             {
-                _context.Cajas.Remove(caja);
+                
                 Movimiento m = new Movimiento();
                 m.Concepto = "Eliminacion de caja";
                 m.Valor = -caja.Saldo;
+                m.IdCaja = caja.Id;
+                //m.UserId = idUsuario;
+                _context.Movimientos.Add(m);
+                _context.SaveChanges();
+                _context.Cajas.Remove(caja);
                 _context.SaveChanges();
                 return Ok();
             } else
@@ -54,18 +60,18 @@ namespace APIFC3.Controllers
         }
 
         [HttpPost]
-        public ActionResult NuevaCaja(CreacionCaja c)
+        public ActionResult NuevaCaja(Caja caja)
         {
+            Debug.WriteLine("llegue a entrar");
             int entidadesAfectadas = 0;
             try
             {
-                _context.Cajas.Add(c.caja);
+                _context.Cajas.Add(caja);
                 entidadesAfectadas += _context.SaveChanges();
                 Movimiento m = new Movimiento();
                 m.Concepto = "Saldo inicial";
-                m.Valor = c.caja.Saldo;
-                m.IdCaja = c.caja.Id;
-                m.UserId = c.idUsuario;
+                m.Valor = caja.Saldo;
+                m.IdCaja = caja.Id;
                 _context.Movimientos.Add(m);
                 entidadesAfectadas += _context.SaveChanges();
                 Debug.WriteLine(entidadesAfectadas);

@@ -11,5 +11,5 @@ public partial class Usuario
 
     public string Password { get; set; } = null!;
 
-    public virtual ICollection<Movimiento> Movimientos { get; set; } = new List<Movimiento>();
+    public virtual ICollection<Caja> Cajas { get; set; } = new List<Caja>();
 }
