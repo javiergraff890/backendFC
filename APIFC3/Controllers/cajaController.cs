@@ -2,6 +2,8 @@
 using APIFC3.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace APIFC3.Controllers
@@ -67,7 +69,27 @@ namespace APIFC3.Controllers
             try
             {
                 _context.Cajas.Add(caja);
-                entidadesAfectadas += _context.SaveChanges();
+                try
+                {
+                    entidadesAfectadas += _context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    Debug.WriteLine("capture la excepcion ->>>"+ex.Message);
+                    var innerException = ex.InnerException;
+                    if (innerException is SqlException sqlException)
+                    {
+                        // Aquí puedes realizar un manejo específico para los errores de SQL Server
+                        if (sqlException.Number == 2627)
+                        {
+                            // Se violó una restricción de clave única
+                            // Realizar el manejo correspondiente
+                            Debug.WriteLine("Se violo una restriccion de clave unica");
+                            return NoContent();
+                        }
+                    }
+                }
+                
                 Movimiento m = new Movimiento();
                 m.Concepto = "Saldo inicial";
                 m.Valor = caja.Saldo;
