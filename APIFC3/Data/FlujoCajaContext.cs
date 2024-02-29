@@ -34,6 +34,8 @@ public partial class FlujoCajaContext : DbContext
 
             entity.ToTable("Caja");
 
+            entity.HasIndex(e => new { e.Nombre, e.UserId }, "uq_yourtablename").IsUnique();
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)

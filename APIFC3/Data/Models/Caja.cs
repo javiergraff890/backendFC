@@ -15,5 +15,5 @@ public partial class Caja
 
     public virtual ICollection<Movimiento> Movimientos { get; set; } = new List<Movimiento>();
 
-    public virtual Usuario? User { get; set; } = null!;
+    public virtual Usuario User { get; set; } = null!;
 }
