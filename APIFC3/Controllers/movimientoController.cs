@@ -1,5 +1,9 @@
 ﻿using APIFC3.Data;
+using APIFC3.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace APIFC3.Controllers
 {
@@ -12,6 +16,29 @@ namespace APIFC3.Controllers
         public movimientoController(FlujoCajaContext context)
         {
             _context = context;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IEnumerable<Movimiento> Get()
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            Debug.WriteLine("recibi el token = " + token);
+
+            // Decodifica el token JWT
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            Debug.WriteLine("user id = " + userIdClaim);
+
+
+           var movimientosPorUsuario = from movimiento in _context.Movimientos
+                                            join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
+                                            where caja.UserId == int.Parse(userIdClaim)
+                                       select movimiento;
+
+
+            return movimientosPorUsuario;
         }
 
     }
