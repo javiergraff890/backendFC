@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace APIFC3.Controllers
 {
@@ -20,9 +21,26 @@ namespace APIFC3.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IEnumerable<Caja> Get()
         {
-            return _context.Cajas.ToList();
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            Debug.WriteLine("recibi el token = " + token);
+
+            // Decodifica el token JWT
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            Debug.WriteLine("user id = " + userIdClaim);
+
+            if (userIdClaim != null)
+            {
+                return _context.Cajas.Where(c => c.UserId == int.Parse(userIdClaim)).ToList();
+            } else
+            { 
+                return Enumerable.Empty<Caja>(); 
+            }
+            
         }
 
         [HttpGet("{id}")]
@@ -44,13 +62,8 @@ namespace APIFC3.Controllers
             //si quiero eliminar una caja debo eliminar a todos los movimientos
             if (caja != null)
             {
-                
-                Movimiento m = new Movimiento();
-                m.Concepto = "Eliminacion de caja";
-                m.Valor = -caja.Saldo;
-                m.IdCaja = caja.Id;
-                //m.UserId = idUsuario;
-                _context.Movimientos.Add(m);
+                IQueryable<Movimiento> movs = _context.Movimientos.Where(m => m.IdCaja == caja.Id);
+                _context.Movimientos.RemoveRange(movs);
                 _context.SaveChanges();
                 _context.Cajas.Remove(caja);
                 _context.SaveChanges();
