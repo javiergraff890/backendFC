@@ -41,5 +41,22 @@ namespace APIFC3.Controllers
             return movimientosPorUsuario;
         }
 
+        [HttpPost]
+        public IActionResult insertar(Movimiento movimiento)
+        {
+            var caja = _context.Cajas.FirstOrDefault( c => c.Id == movimiento.IdCaja);
+            if (caja != null)
+            {
+                caja.Saldo = caja.Saldo + movimiento.Valor;
+                _context.Movimientos.Add(movimiento);
+                _context.SaveChanges();
+                return Ok();
+            } else
+            {
+                return BadRequest();
+            }
+            
+        } 
+
     }
 }

@@ -13,5 +13,5 @@ public partial class Movimiento
 
     public int IdCaja { get; set; }
 
-    public virtual Caja IdCajaNavigation { get; set; } = null!;
+    public virtual Caja? IdCajaNavigation { get; set; } = null!;
 }
