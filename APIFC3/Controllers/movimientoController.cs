@@ -3,6 +3,7 @@ using APIFC3.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 
 namespace APIFC3.Controllers
@@ -32,16 +33,18 @@ namespace APIFC3.Controllers
             Debug.WriteLine("user id = " + userIdClaim);
 
 
-           var movimientosPorUsuario = from movimiento in _context.Movimientos
-                                            join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
-                                            where caja.UserId == int.Parse(userIdClaim)
-                                       select movimiento;
+            var movimientosPorUsuario = from movimiento in _context.Movimientos
+                                        join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
+                                        where caja.UserId == int.Parse(userIdClaim)
+                                        select movimiento;
 
 
             return movimientosPorUsuario;
+
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult insertar(Movimiento movimiento)
         {
             var caja = _context.Cajas.FirstOrDefault( c => c.Id == movimiento.IdCaja);

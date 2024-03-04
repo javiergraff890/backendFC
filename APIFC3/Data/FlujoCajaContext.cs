@@ -53,7 +53,7 @@ public partial class FlujoCajaContext : DbContext
 
         modelBuilder.Entity<Movimiento>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Movimien__3213E83F65AA1B84");
+            entity.HasKey(e => e.Id).HasName("PK__Movimien__3213E83F81820802");
 
             entity.ToTable("Movimiento");
 
@@ -62,6 +62,9 @@ public partial class FlujoCajaContext : DbContext
                 .HasMaxLength(200)
                 .IsUnicode(false)
                 .HasColumnName("concepto");
+            entity.Property(e => e.Fecha)
+                .HasColumnType("datetime")
+                .HasColumnName("fecha");
             entity.Property(e => e.IdCaja).HasColumnName("idCaja");
             entity.Property(e => e.Valor)
                 .HasColumnType("decimal(10, 2)")
@@ -70,7 +73,7 @@ public partial class FlujoCajaContext : DbContext
             entity.HasOne(d => d.IdCajaNavigation).WithMany(p => p.Movimientos)
                 .HasForeignKey(d => d.IdCaja)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Movimient__idCaj__1EA48E88");
+                .HasConstraintName("FK__Movimient__idCaj__2BFE89A6");
         });
 
         modelBuilder.Entity<Usuario>(entity =>
