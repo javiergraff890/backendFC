@@ -55,7 +55,7 @@ namespace APIFC3.Controllers
         }
 
         [HttpDelete("{id}")] 
-        public ActionResult Delete(int id, int idUsuario) {
+        public ActionResult Delete(int id) {
             //revisar este warning, si bien yo envio siempre un id correcto alguna mala llamada puede romper la api
             var caja = _context.Cajas.Find(id);
 
@@ -122,9 +122,8 @@ namespace APIFC3.Controllers
                 
                 return StatusCode(500, "Error interno del servidor : "+mensaje);
             }
-            
-            
 
         }
+
     }
 }
