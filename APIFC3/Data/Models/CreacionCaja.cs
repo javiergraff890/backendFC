@@ -3,6 +3,6 @@
     public partial class CreacionCaja
     {
         public Caja caja { get; set; }
-        public int idUsuario { get; set; }
+        public DateTime Fecha { get; set; }
     }
 }

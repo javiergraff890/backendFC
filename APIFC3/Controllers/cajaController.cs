@@ -75,13 +75,13 @@ namespace APIFC3.Controllers
         }
 
         [HttpPost]
-        public ActionResult NuevaCaja(Caja caja)
+        public ActionResult NuevaCaja(CreacionCaja caja)
         {
             Debug.WriteLine("llegue a entrar");
             int entidadesAfectadas = 0;
             try
             {
-                _context.Cajas.Add(caja);
+                _context.Cajas.Add(caja.caja);
                 try
                 {
                     entidadesAfectadas += _context.SaveChanges();
@@ -105,8 +105,9 @@ namespace APIFC3.Controllers
                 
                 Movimiento m = new Movimiento();
                 m.Concepto = "Saldo inicial";
-                m.Valor = caja.Saldo;
-                m.IdCaja = caja.Id;
+                m.Valor = caja.caja.Saldo;
+                m.IdCaja = caja.caja.Id;
+                m.Fecha = caja.Fecha;
                 _context.Movimientos.Add(m);
                 entidadesAfectadas += _context.SaveChanges();
                 Debug.WriteLine(entidadesAfectadas);
