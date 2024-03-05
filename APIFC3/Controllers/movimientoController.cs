@@ -77,7 +77,47 @@ namespace APIFC3.Controllers
                 return BadRequest();
             }
             
-        } 
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public ActionResult delete(int id)
+        {
+            var movToRemove = _context.Movimientos.FirstOrDefault( m => m.Id == id);
+            if (movToRemove != null)
+            {
+                if (movToRemove.Concepto == "Saldo inicial")
+                {
+                    
+
+                    var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
+                    if (caja != null)
+                    {
+                        caja.Saldo -= movToRemove.Valor;
+                        movToRemove.Valor = 0;
+                        _context.SaveChanges();
+                        return Ok();
+                    }
+                    return Conflict();
+
+
+                } else
+                {
+                    var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
+                    if (caja != null)
+                    {
+                        caja.Saldo = caja.Saldo - movToRemove.Valor;
+                        _context.Movimientos.Remove(movToRemove);
+                        _context.SaveChanges();
+                        return Ok();
+                    }
+                    return Conflict();
+                }
+                
+                
+            } else
+                return Conflict();
+        }
 
     }
 }
