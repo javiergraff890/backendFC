@@ -19,6 +19,24 @@ namespace APIFC3.Controllers
             _context = context;
         }
 
+        [HttpGet("{first}/{range}")]
+        public IEnumerable<Movimiento> getRange(int first, int range)
+        {
+            var elements = _context.Movimientos.OrderBy( u  => u.Fecha)
+                                        .Skip(first-1)
+                                        .Take(range)
+                                        .ToList();
+
+            if (elements.Any())
+            {
+                return elements;
+            } else
+            {
+                return Enumerable.Empty<Movimiento>();
+            }
+
+        }
+        
         [HttpGet]
         [Authorize]
         public IEnumerable<Movimiento> Get()
