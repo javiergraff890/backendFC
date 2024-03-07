@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("APIFC3")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd383b2cbd822994862b16038b6bed2bf589fc54")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c1a05f510da3ee4e6df4b5890019b07948a3ff99")]
 [assembly: System.Reflection.AssemblyProductAttribute("APIFC3")]
 [assembly: System.Reflection.AssemblyTitleAttribute("APIFC3")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

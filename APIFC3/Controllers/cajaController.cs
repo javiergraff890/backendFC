@@ -33,6 +33,10 @@ namespace APIFC3.Controllers
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
             Debug.WriteLine("user id = " + userIdClaim);
 
+            Debug.WriteLine("empezo el delay");
+            Thread.Sleep(10000);
+            Debug.WriteLine("fin del delay");
+
             if (userIdClaim != null)
             {
                 return _context.Cajas.Where(c => c.UserId == int.Parse(userIdClaim)).ToList();

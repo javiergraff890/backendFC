@@ -55,8 +55,7 @@ namespace APIFC3.Controllers
                                         join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
                                         where caja.UserId == int.Parse(userIdClaim)
                                         select movimiento;
-
-
+            
             return movimientosPorUsuario;
 
         }
