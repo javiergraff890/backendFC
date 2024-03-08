@@ -21,7 +21,7 @@ namespace APIFC3.Controllers
 
         [HttpGet("{first}/{range}")]
         [Authorize]
-        public IEnumerable<Movimiento> getRange(int first, int range)
+        public ActionResult<getMovResult> getRange(int first, int range)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
             Debug.WriteLine("recibi el token = " + token);
@@ -42,12 +42,24 @@ namespace APIFC3.Controllers
                                         .Take(range)
                                         .ToList();
 
+            getMovResult res = new getMovResult();
             if (elements.Any())
             {
-                return elements;
+                res.movs = elements;
+                if (elements.OrderBy( e => e.Fecha).Last() == movimientosPorUsuario.OrderBy(e => e.Fecha).Last())
+                {
+                    res.siguiente = false;
+                } else
+                {
+                    res.siguiente = true;   
+                   
+                }
+                return res;
             } else
             {
-                return Enumerable.Empty<Movimiento>();
+                res.movs = Enumerable.Empty<Movimiento>();
+                res.siguiente = false;
+                return res;
             }
 
         }
