@@ -20,9 +20,24 @@ namespace APIFC3.Controllers
         }
 
         [HttpGet("{first}/{range}")]
+        [Authorize]
         public IEnumerable<Movimiento> getRange(int first, int range)
         {
-            var elements = _context.Movimientos.OrderBy( u  => u.Fecha)
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            Debug.WriteLine("recibi el token = " + token);
+
+            // Decodifica el token JWT
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            Debug.WriteLine("user id = " + userIdClaim);
+
+            var movimientosPorUsuario = from movimiento in _context.Movimientos
+                                        join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
+                                        where caja.UserId == int.Parse(userIdClaim)
+                                        select movimiento;
+
+            var elements = movimientosPorUsuario.OrderBy( u  => u.Fecha)
                                         .Skip(first-1)
                                         .Take(range)
                                         .ToList();
@@ -55,7 +70,9 @@ namespace APIFC3.Controllers
                                         join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
                                         where caja.UserId == int.Parse(userIdClaim)
                                         select movimiento;
-            
+            //Debug.WriteLine("empezo el delay");
+            //Thread.Sleep(10000);
+            //Debug.WriteLine("fin del delay");
             return movimientosPorUsuario;
 
         }
