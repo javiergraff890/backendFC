@@ -52,7 +52,6 @@ namespace APIFC3.Controllers
                 } else
                 {
                     res.siguiente = true;   
-                   
                 }
                 return res;
             } else
