@@ -115,7 +115,6 @@ namespace APIFC3.Controllers
             {
                 if (movToRemove.Concepto == "Saldo inicial")
                 {
-                    
 
                     var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
                     if (caja != null)

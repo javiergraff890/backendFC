@@ -26,15 +26,52 @@ namespace APIFC3.Controllers
             _context = context;
         }
 
+        //[HttpPost]
+        //public IActionResult Create(Usuario usuario)
+        //{
+        //    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Password, BCrypt.Net.BCrypt.GenerateSalt());
+        //    Debug.WriteLine("voy a insertar en la bd " + hashedPassword);
+        //    usuario.Password = hashedPassword;
+        //    _context.Usuarios.Add(usuario);
+        //    _context.SaveChanges();
+        //    return Ok();
+        //}
+
         [HttpPost]
         public IActionResult Create(Usuario usuario)
         {
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Password, BCrypt.Net.BCrypt.GenerateSalt());
-            Debug.WriteLine("voy a insertar en la bd " + hashedPassword);
-            usuario.Password = hashedPassword;
-            _context.Usuarios.Add(usuario);
-            _context.SaveChanges();
-            return Ok();
+            if (!(_context.Usuarios.FirstOrDefault(u => u.UserId == usuario.UserId) == null))
+            {
+                //el usuario ya existe, manejar esto, ver si conflict es la mejor opcion
+                return Conflict();
+            }
+            else
+            {
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Password, BCrypt.Net.BCrypt.GenerateSalt());
+                Debug.WriteLine("voy a insertar en la bd " + hashedPassword);
+                usuario.Password = hashedPassword;
+                _context.Usuarios.Add(usuario);
+                _context.SaveChanges();
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var ByteKey = Encoding.UTF8.GetBytes(Constantes.key);
+                var TokenDes = new SecurityTokenDescriptor
+                {
+                    Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
+                    {
+                            new Claim("userId", usuario.UserId.ToString()),
+                            new Claim(ClaimTypes.Name, usuario.UserName)
+                    }),
+                    Expires = DateTime.UtcNow.AddDays(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(ByteKey), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var tkn = tokenHandler.CreateToken(TokenDes);
+
+                return Ok(tokenHandler.WriteToken(tkn));
+            }
+
+
         }
 
         [HttpPost]
