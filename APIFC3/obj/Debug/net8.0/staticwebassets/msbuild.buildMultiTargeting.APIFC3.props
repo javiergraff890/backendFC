@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\APIFC3.props" />
-</Project>
