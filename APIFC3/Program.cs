@@ -12,13 +12,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("_myAllowSpecificOrigins",
         builder =>
         {
-            builder.WithOrigins("http://localhost:5173","http://192.168.0.4") // Reemplaza el puerto 3000 con el puerto en el que se ejecuta tu aplicación React
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-
-            //builder.AllowAnyOrigin() // Reemplaza el puerto 3000 con el puerto en el que se ejecuta tu aplicación React
+            //builder.WithOrigins("http://localhost:5173","http://192.168.0.4") // Reemplaza el puerto 3000 con el puerto en el que se ejecuta tu aplicación React
             //       .AllowAnyHeader()
             //       .AllowAnyMethod();
+
+            builder.AllowAnyOrigin() // Reemplaza el puerto 3000 con el puerto en el que se ejecuta tu aplicación React
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
 
         });
 });

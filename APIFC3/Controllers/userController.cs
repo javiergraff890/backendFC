@@ -40,10 +40,18 @@ namespace APIFC3.Controllers
         [HttpPost]
         public IActionResult Create(Usuario usuario)
         {
-            if (!(_context.Usuarios.FirstOrDefault(u => u.UserId == usuario.UserId) == null))
+            if (!(_context.Usuarios.FirstOrDefault(u => u.UserName == usuario.UserName) == null))
             {
+                var errorResponse = new
+                {
+                    error = new
+                    {
+                        message = "El usuario ya existe",
+                        code = "user_already_exist"
+                    }
+                };
                 //el usuario ya existe, manejar esto, ver si conflict es la mejor opcion
-                return Conflict();
+                return Conflict(errorResponse);
             }
             else
             {
