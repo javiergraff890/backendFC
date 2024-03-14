@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace APIFC3.Controllers
 {
@@ -41,6 +42,14 @@ namespace APIFC3.Controllers
                                         .Skip(first-1)
                                         .Take(range)
                                         .ToList();
+
+                 Thread.Sleep(5000);
+
+
+
+
+
+
 
             getMovResult res = new getMovResult();
             if (elements.Any())
@@ -89,21 +98,67 @@ namespace APIFC3.Controllers
 
         }
 
+        private (bool , string) validacionMovimiento(Movimiento movimiento)
+        {
+            string numeroComoCadena = movimiento.Valor.ToString();
+            string[] partes = numeroComoCadena.Split('.');
+            if (partes.Length == 1) {
+                //tiene solo parte entera
+                if (partes[0].Length > 8)
+                {
+                    return (false, "overflow_valor_parte_entera");
+                }
+            }
+            else if (partes.Length == 2)
+            {
+                if (partes[0].Length > 8)
+                {
+                    return (false, "overflow_valor_parte_entera");
+                }
+                if (partes[1].Length > 2)
+                {
+                    return (false, "overflow_valor_parte_real");
+                }
+            } else
+            {
+                return (false, "valor_invalido");
+            }
+
+            //llegue aca con valor valido
+
+            if (movimiento.Concepto.Length > 50)
+            {
+                return (false, "concepto_overflow");
+            }
+
+            return (true, "");
+        }
+
         [HttpPost]
         [Authorize]
         public IActionResult insertar(Movimiento movimiento)
         {
-            var caja = _context.Cajas.FirstOrDefault( c => c.Id == movimiento.IdCaja);
-            if (caja != null)
+            (bool movimientoValido, string mensajeError) = validacionMovimiento(movimiento);
+            if (movimientoValido)
             {
-                caja.Saldo = caja.Saldo + movimiento.Valor;
-                _context.Movimientos.Add(movimiento);
-                _context.SaveChanges();
-                return Ok();
+                var caja = _context.Cajas.FirstOrDefault(c => c.Id == movimiento.IdCaja);
+                if (caja != null)
+                {
+                    caja.Saldo = caja.Saldo + movimiento.Valor;
+                    _context.Movimientos.Add(movimiento);
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    //por ahora asumo que siempre llega una llave foranea valida, para algun caso extremo deberia tratarlo
+                    return BadRequest();
+                }
             } else
             {
-                return BadRequest();
+                return UnprocessableEntity(mensajeError);
             }
+            
             
         }
 
