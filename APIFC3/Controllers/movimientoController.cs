@@ -150,12 +150,21 @@ namespace APIFC3.Controllers
                 var caja = _context.Cajas.FirstOrDefault(c => c.Id == movimiento.IdCaja);
                 if (caja != null)
                 {
-                    caja.Saldo = caja.Saldo + movimiento.Valor;
+                    decimal nuevoSaldo = caja.Saldo + movimiento.Valor;
 
-                    _context.Movimientos.Add(movimiento);
+                    if (nuevoSaldo > 99999999.99m)
+                    {
+                        return UnprocessableEntity("saldo_maximo_excedido");
+                        //error
+                    } else
+                    {
+                        caja.Saldo = nuevoSaldo;
+                        _context.Movimientos.Add(movimiento);
+                        _context.SaveChanges();
+                        return Ok();
+                    }
+
                     
-                    _context.SaveChanges();
-                    return Ok();
                 }
                 else
                 {
