@@ -110,20 +110,20 @@ namespace APIFC3.Controllers
             string[] partes = numeroComoCadena.Split(',');
             if (partes.Length == 1) {
                 //tiene solo parte entera
-                if (partes[0].Length > 8)
+                if ((partes[0][0] != '-' && partes[0].Length > 8) || (partes[0][0] == '-' && partes[0].Length > 9))
                 {
                     return (false, "overflow_valor_parte_entera");
-                }
+                } 
             }
             else if (partes.Length == 2)
             {
-                if (partes[0].Length > 8)
+                if ((partes[0][0] != '-' && partes[0].Length > 8) || (partes[0][0] == '-' && partes[0].Length > 9))
                 {
                     return (false, "overflow_valor_parte_entera");
                 }
                 if (partes[1].Length > 2)
                 {
-                    return (false, "overflow_valor_parte_real");
+                    return (false, "overflow_valor_parte_decimal");
                 }
             } else
             {
@@ -131,7 +131,8 @@ namespace APIFC3.Controllers
             }
 
             //llegue aca con valor valido
-
+            //si bien en la base de datos pueso insertar 200 decidi no cambiarlo aca ya que es un proyecto personal
+            //si fuera una aplicacion real debo remapear el entity cambiando el tamaño en la base de datos
             if (movimiento.Concepto.Length > 50)
             {
                 return (false, "concepto_overflow");
@@ -156,7 +157,10 @@ namespace APIFC3.Controllers
                     {
                         return UnprocessableEntity("saldo_maximo_excedido");
                         //error
-                    } else
+                    } else if (nuevoSaldo < -99999999.99m)
+                    {
+                        return UnprocessableEntity("saldo_minimo_excedido");
+                    }
                     {
                         caja.Saldo = nuevoSaldo;
                         _context.Movimientos.Add(movimiento);
