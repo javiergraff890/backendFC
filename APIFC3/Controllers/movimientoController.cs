@@ -100,8 +100,14 @@ namespace APIFC3.Controllers
 
         private (bool , string) validacionMovimiento(Movimiento movimiento)
         {
+            Debug.WriteLine("");
+            Debug.WriteLine("numerocomodecimal = " + movimiento.Valor);
+            Debug.WriteLine("");
             string numeroComoCadena = movimiento.Valor.ToString();
-            string[] partes = numeroComoCadena.Split('.');
+            Debug.WriteLine("");
+            Debug.WriteLine("numerocomocadena = " + numeroComoCadena);
+            Debug.WriteLine("");
+            string[] partes = numeroComoCadena.Split(',');
             if (partes.Length == 1) {
                 //tiene solo parte entera
                 if (partes[0].Length > 8)
@@ -145,7 +151,9 @@ namespace APIFC3.Controllers
                 if (caja != null)
                 {
                     caja.Saldo = caja.Saldo + movimiento.Valor;
+
                     _context.Movimientos.Add(movimiento);
+                    
                     _context.SaveChanges();
                     return Ok();
                 }
