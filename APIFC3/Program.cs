@@ -46,6 +46,7 @@ builder.Services.AddAuthentication("Bearer").AddJwtBearer( opt =>
         ValidateAudience = false,
         ValidateIssuer = false,
         IssuerSigningKey = Constantes.signingKey,
+        ClockSkew = TimeSpan.Zero
     };
 });
 
