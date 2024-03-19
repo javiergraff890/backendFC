@@ -187,39 +187,47 @@ namespace APIFC3.Controllers
         [Authorize]
         public ActionResult delete(int id)
         {
-            var movToRemove = _context.Movimientos.FirstOrDefault( m => m.Id == id);
+            var movToRemove = _context.Movimientos.FirstOrDefault(m => m.Id == id);
             if (movToRemove != null)
             {
-                if (movToRemove.Concepto == "Saldo inicial")
+                var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
+
+
+                if (caja != null)
                 {
 
-                    var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
-                    if (caja != null)
-                    {
-                        caja.Saldo -= movToRemove.Valor;
-                        movToRemove.Valor = 0;
-                        _context.SaveChanges();
-                        return Ok();
-                    }
-                    return Conflict();
+                    decimal saldoResultante = caja.Saldo - movToRemove.Valor;
 
-
-                } else
-                {
-                    var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
-                    if (caja != null)
+                    if (saldoResultante > 99999999.99m || saldoResultante < -99999999.99m)
                     {
-                        caja.Saldo = caja.Saldo - movToRemove.Valor;
-                        _context.Movimientos.Remove(movToRemove);
-                        _context.SaveChanges();
-                        return Ok();
+                        return UnprocessableEntity("saldo_caja_inconsistente");
                     }
-                    return Conflict();
+                    else
+                    {
+                        if (movToRemove.Concepto == "Saldo inicial")
+                        {
+                            caja.Saldo -= movToRemove.Valor;
+                            movToRemove.Valor = 0;
+                            _context.SaveChanges();
+                            return Ok();
+                        }
+                        else
+                        {
+                            caja.Saldo = caja.Saldo - movToRemove.Valor;
+                            _context.Movimientos.Remove(movToRemove);
+                            _context.SaveChanges();
+                            return Ok();
+                        }
+                    }
                 }
-                
-                
+                else
+                {
+                    return Conflict("Movimiento sin caja asociada");
+                }
             } else
+            {
                 return Conflict();
+            }
         }
 
     }
