@@ -52,6 +52,7 @@ namespace APIFC3.Controllers
 
 
             getMovResult res = new getMovResult();
+            res.cantidadMovs = movimientosPorUsuario.Count();
             if (elements.Any())
             {
                 res.movs = elements;

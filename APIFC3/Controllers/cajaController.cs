@@ -33,7 +33,7 @@ namespace APIFC3.Controllers
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
             Debug.WriteLine("user id = " + userIdClaim);
 
-            
+            Thread.Sleep(5000);
 
             if (userIdClaim != null)
             {
@@ -56,7 +56,8 @@ namespace APIFC3.Controllers
             return Ok(caja);
         }
 
-        [HttpDelete("{id}")] 
+        [HttpDelete("{id}")]
+        [Authorize]
         public ActionResult Delete(int id) {
             //revisar este warning, si bien yo envio siempre un id correcto alguna mala llamada puede romper la api
             var caja = _context.Cajas.Find(id);
@@ -77,9 +78,10 @@ namespace APIFC3.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult NuevaCaja(CreacionCaja caja)
         {
-            Debug.WriteLine("llegue a entrar");
+            Debug.WriteLine("llegue a entrar a nueva caja");
             int entidadesAfectadas = 0;
             try
             {

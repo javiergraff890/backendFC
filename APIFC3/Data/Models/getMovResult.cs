@@ -4,5 +4,6 @@
     {
         public IEnumerable<Movimiento> movs {  get; set; }
         public bool siguiente { get; set; }
+        public int cantidadMovs { get; set; }  
     }
 }
