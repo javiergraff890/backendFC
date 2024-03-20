@@ -82,50 +82,59 @@ namespace APIFC3.Controllers
         public ActionResult NuevaCaja(CreacionCaja caja)
         {
             Debug.WriteLine("llegue a entrar a nueva caja");
-            int entidadesAfectadas = 0;
-            try
+            if (caja.caja.Saldo < 0)
             {
-                _context.Cajas.Add(caja.caja);
+                return UnprocessableEntity("saldo_negativo");
+            } else
+            {
+                int entidadesAfectadas = 0;
                 try
                 {
-                    entidadesAfectadas += _context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    Debug.WriteLine("capture la excepcion ->>>"+ex.Message);
-                    var innerException = ex.InnerException;
-                    if (innerException is SqlException sqlException)
+                    _context.Cajas.Add(caja.caja);
+                    try
                     {
-                        // Aquí puedes realizar un manejo específico para los errores de SQL Server
-                        if (sqlException.Number == 2627)
+                        entidadesAfectadas += _context.SaveChanges();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        Debug.WriteLine("capture la excepcion ->>>" + ex.Message);
+                        var innerException = ex.InnerException;
+                        if (innerException is SqlException sqlException)
                         {
-                            // Se violó una restricción de clave única
-                            // Realizar el manejo correspondiente
-                            Debug.WriteLine("Se violo una restriccion de clave unica");
-                            return NoContent();
+                            // Aquí puedes realizar un manejo específico para los errores de SQL Server
+                            if (sqlException.Number == 2627)
+                            {
+                                // Se violó una restricción de clave única
+                                // Realizar el manejo correspondiente
+                                Debug.WriteLine("Se violo una restriccion de clave unica");
+                                return NoContent();
+                            }
                         }
                     }
+
+                    Movimiento m = new Movimiento();
+                    m.Concepto = "Saldo inicial";
+                    m.Valor = caja.caja.Saldo;
+                    m.IdCaja = caja.caja.Id;
+                    m.Fecha = caja.Fecha;
+                    _context.Movimientos.Add(m);
+                    entidadesAfectadas += _context.SaveChanges();
+                    Debug.WriteLine(entidadesAfectadas);
+                    return Ok();
                 }
-                
-                Movimiento m = new Movimiento();
-                m.Concepto = "Saldo inicial";
-                m.Valor = caja.caja.Saldo;
-                m.IdCaja = caja.caja.Id;
-                m.Fecha = caja.Fecha;
-                _context.Movimientos.Add(m);
-                entidadesAfectadas += _context.SaveChanges();
-                Debug.WriteLine(entidadesAfectadas);
-                return Ok();
-            } catch(Exception e)
-            {
-                string mensaje ="";
-                if (entidadesAfectadas == 0)
-                    mensaje = "No se inserto ningun elemento";
-                else if (entidadesAfectadas == 1)
-                    mensaje = "no se pudo insertar el movimiento inicial";
-                
-                return StatusCode(500, "Error interno del servidor : "+mensaje);
+                catch (Exception e)
+                {
+                    string mensaje = "";
+                    if (entidadesAfectadas == 0)
+                        mensaje = "No se inserto ningun elemento";
+                    else if (entidadesAfectadas == 1)
+                        mensaje = "no se pudo insertar el movimiento inicial";
+
+                    return StatusCode(500, "Error interno del servidor : " + mensaje);
+                }
+
             }
+            
 
         }
 
