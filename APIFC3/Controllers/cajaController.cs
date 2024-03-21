@@ -77,12 +77,30 @@ namespace APIFC3.Controllers
             }
         }
 
+        private bool validarCaja(Caja caja)
+        {
+            Debug.WriteLine("");
+            Debug.WriteLine(caja.Nombre.Length);
+            Debug.WriteLine("");
+
+
+            if (caja.Nombre.Length > 100) {
+                return false;
+            }
+            else
+            {
+                if (caja.Saldo < 0 || caja.Saldo > 99999999.99M)
+                    return false;
+            } 
+            return true;
+        }
+
         [HttpPost]
         [Authorize]
         public ActionResult NuevaCaja(CreacionCaja caja)
         {
             Debug.WriteLine("llegue a entrar a nueva caja");
-            if (caja.caja.Saldo < 0)
+            if (!validarCaja(caja.caja))
             {
                 return UnprocessableEntity("saldo_negativo");
             } else
