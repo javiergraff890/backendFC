@@ -158,9 +158,9 @@ namespace APIFC3.Controllers
                     {
                         return UnprocessableEntity("saldo_maximo_excedido");
                         //error
-                    } else if (nuevoSaldo < -99999999.99m)
+                    } else if (nuevoSaldo < 0)
                     {
-                        return UnprocessableEntity("saldo_minimo_excedido");
+                        return UnprocessableEntity("saldo_negativo");
                     }
                     {
                         caja.Saldo = nuevoSaldo;
@@ -199,7 +199,7 @@ namespace APIFC3.Controllers
 
                     decimal saldoResultante = caja.Saldo - movToRemove.Valor;
 
-                    if (saldoResultante > 99999999.99m || saldoResultante < -99999999.99m)
+                    if (saldoResultante > 99999999.99m || saldoResultante < 0)
                     {
                         return UnprocessableEntity("saldo_caja_inconsistente");
                     }
