@@ -13,6 +13,7 @@ using BCrypt.Net;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace APIFC3.Controllers
 {
@@ -80,6 +81,82 @@ namespace APIFC3.Controllers
             }
 
 
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public IActionResult Delete()
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+
+            // Decodifica el token JWT
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+
+            if (userId != null)
+            {
+                try
+                {
+                    int userIdInt = Int32.Parse(userId);
+                    
+                    //meter try catch aca
+                    var cajasDelUsuario = from caja in _context.Cajas
+                                          where caja.UserId == userIdInt
+                                          select caja;
+
+                    var movimientosDelUsuario = from caja in cajasDelUsuario
+                                                join movimiento in _context.Movimientos
+                                                on caja.Id equals movimiento.IdCaja
+                                                select movimiento;
+
+
+                    Debug.WriteLine("-CAJAS-");
+                    foreach( Caja c in  cajasDelUsuario )
+                    {
+                        Debug.WriteLine(c.Nombre);
+                    }
+                    Debug.WriteLine("--");
+
+                    Debug.WriteLine("-MOVIMIENTOS-");
+                    foreach (Movimiento m in movimientosDelUsuario)
+                    {
+                        Debug.WriteLine(m.Concepto);
+                    }
+                    Debug.WriteLine("--");
+
+                    try
+                    {
+                        _context.Movimientos.RemoveRange(movimientosDelUsuario);
+                        _context.Cajas.RemoveRange(cajasDelUsuario);
+                        _context.Usuarios.RemoveRange(_context.Usuarios.Where(u => u.UserId == userIdInt));
+                        _context.SaveChanges();
+                        return Ok();
+                    } catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        return StatusCode(500, "No se pudo eliminar el usuario");
+                    }
+                    
+
+                }
+                catch {
+                    //se convirtio mal el string que venia como id en el token
+                    return UnprocessableEntity();
+                }
+                
+            } else
+            {
+                return UnprocessableEntity();
+                //error en el token
+            }
+            
+
+
+            //primero eliminar todos los movimeientos
+            //luego borrar todas las cajas
+            //luego borrar al usuario
+            return Ok();
         }
 
         [HttpPost]
