@@ -27,16 +27,6 @@ namespace APIFC3.Controllers
             _context = context;
         }
 
-        //[HttpPost]
-        //public IActionResult Create(Usuario usuario)
-        //{
-        //    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Password, BCrypt.Net.BCrypt.GenerateSalt());
-        //    Debug.WriteLine("voy a insertar en la bd " + hashedPassword);
-        //    usuario.Password = hashedPassword;
-        //    _context.Usuarios.Add(usuario);
-        //    _context.SaveChanges();
-        //    return Ok();
-        //}
 
         [HttpPost]
         public IActionResult Create(Usuario usuario)
@@ -47,7 +37,7 @@ namespace APIFC3.Controllers
                 {
                     error = new
                     {
-                        message = "El usuario ya existe",
+                          message = "El usuario ya existe",
                         code = "user_already_exist"
                     }
                 };
