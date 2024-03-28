@@ -77,8 +77,6 @@ namespace APIFC3.Controllers
 
                 return Ok(tokenHandler.WriteToken(tkn));
             }
-
-
         }
 
         [HttpDelete]
@@ -99,44 +97,28 @@ namespace APIFC3.Controllers
                     int userIdInt = Int32.Parse(userId);
                     
                     //meter try catch aca
-                    var cajasDelUsuario = from caja in _context.Cajas
-                                          where caja.UserId == userIdInt
-                                          select caja;
-
-                    var movimientosDelUsuario = from caja in cajasDelUsuario
-                                                join movimiento in _context.Movimientos
-                                                on caja.Id equals movimiento.IdCaja
-                                                select movimiento;
-
-
-                    Debug.WriteLine("-CAJAS-");
-                    foreach( Caja c in  cajasDelUsuario )
-                    {
-                        Debug.WriteLine(c.Nombre);
-                    }
-                    Debug.WriteLine("--");
-
-                    Debug.WriteLine("-MOVIMIENTOS-");
-                    foreach (Movimiento m in movimientosDelUsuario)
-                    {
-                        Debug.WriteLine(m.Concepto);
-                    }
-                    Debug.WriteLine("--");
-
                     try
                     {
+                        var cajasDelUsuario = from caja in _context.Cajas
+                                              where caja.UserId == userIdInt
+                                              select caja;
+
+                        var movimientosDelUsuario = from caja in cajasDelUsuario
+                                                    join movimiento in _context.Movimientos
+                                                    on caja.Id equals movimiento.IdCaja
+                                                    select movimiento;
+
                         _context.Movimientos.RemoveRange(movimientosDelUsuario);
                         _context.Cajas.RemoveRange(cajasDelUsuario);
                         _context.Usuarios.RemoveRange(_context.Usuarios.Where(u => u.UserId == userIdInt));
                         _context.SaveChanges();
                         return Ok();
+
                     } catch(Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
-                        return StatusCode(500, "No se pudo eliminar el usuario");
+                        Console.WriteLine($"Se produjo una excepción: {ex.Message} - No se pudo eliminar el usuario");
+                        return BadRequest(ex);
                     }
-                    
-
                 }
                 catch {
                     //se convirtio mal el string que venia como id en el token
@@ -148,13 +130,7 @@ namespace APIFC3.Controllers
                 return UnprocessableEntity();
                 //error en el token
             }
-            
 
-
-            //primero eliminar todos los movimeientos
-            //luego borrar todas las cajas
-            //luego borrar al usuario
-            return Ok();
         }
 
         [HttpPost]
