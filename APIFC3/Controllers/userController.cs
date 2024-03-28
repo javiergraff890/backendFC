@@ -47,10 +47,18 @@ namespace APIFC3.Controllers
             else
             {
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(usuario.Password, BCrypt.Net.BCrypt.GenerateSalt());
-                Debug.WriteLine("voy a insertar en la bd " + hashedPassword);
                 usuario.Password = hashedPassword;
                 _context.Usuarios.Add(usuario);
-                _context.SaveChanges();
+
+                try
+                {
+                    _context.SaveChanges();
+                } catch (Exception ex)
+                {
+                    Console.WriteLine($"Se produjo una excepción: {ex.Message}");
+                    return BadRequest(ex);
+                }
+                
 
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var ByteKey = Encoding.UTF8.GetBytes(Constantes.key);
