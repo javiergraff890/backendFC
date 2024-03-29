@@ -137,34 +137,18 @@ namespace APIFC3.Controllers
         [Route("[action]")]
         public IActionResult Login(Usuario usuario)
         {
-            //Debug.WriteLine(token.token);
-            //string[] parametros = token.token.Split('#');
-            //string fecha = parametros[0];
+
             string user = usuario.UserName;
             string password = usuario.Password;
 
-            //DateTime horaRecibida = DateTime.Parse(fecha);
-            //DateTime horaActual = DateTime.Now;
-
-            //TimeSpan diferencia = horaActual - horaRecibida;
-            //double diferenciaEnSegundos = diferencia.TotalSeconds;
-            //Debug.WriteLine("La diferencia en segundos es: " + diferenciaEnSegundos);
-
-            //if (diferenciaEnSegundos > 30)
-            //{
-            //    return Unauthorized("Token expirado o no valido");
-
-            //}
-            Debug.WriteLine("usuario es -> " + user);
+            //intento buscar una entidad con ese username
             var userinDB = _context.Usuarios.FirstOrDefault(u => u.UserName == user);
 
             if (userinDB != null) {
-                Debug.WriteLine("la pass recibida es " + password);
+                
+                //encripto la password
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt());
                 string passDb = userinDB.Password;
-
-                Debug.WriteLine("pass rv: " + hashedPassword);
-                Debug.WriteLine("pass db: " + passDb);
 
                 /**
                  * Se ingresa primero la password recibida sin encriptar y luego el hash guardado en la base de datos
@@ -174,7 +158,6 @@ namespace APIFC3.Controllers
 
                 if (contrasenaValida)
                 {
-                    Debug.WriteLine("login exitoso");
                     var tokenHandler = new JwtSecurityTokenHandler();
                     var ByteKey = Encoding.UTF8.GetBytes(Constantes.key);
                     var TokenDes = new SecurityTokenDescriptor
@@ -195,31 +178,16 @@ namespace APIFC3.Controllers
                 }else
                 {
                     Debug.WriteLine("datos incorrectos");
-                    return Unauthorized();
+                    return Unauthorized("password");
                     
                 }
 
             } else
             {
-                Debug.WriteLine("llamada nula");
                 //unauthorized por nombre de usuario incorrecto
-                return Unauthorized();
+                return Unauthorized("user");
             }
-
-
-
-            return Ok();
         }
-
-        //[HttpGet]
-        //[Route("[action]")]
-        //public IActionResult Date()
-        //{
-        //    DateTime horaActual = DateTime.Now;
-        //    // Devuelve la hora actual como respuesta al cliente
-        //    return Ok(horaActual);
-        //}
-
     }
     
 }
