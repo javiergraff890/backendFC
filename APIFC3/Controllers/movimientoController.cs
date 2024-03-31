@@ -25,90 +25,87 @@ namespace APIFC3.Controllers
         public ActionResult<getMovResult> getRange(int first, int range)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-            Debug.WriteLine("recibi el token = " + token);
 
             // Decodifica el token JWT
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.ReadJwtToken(token);
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            Debug.WriteLine("user id = " + userIdClaim);
 
-            var movimientosPorUsuario = from movimiento in _context.Movimientos
-                                        join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
-                                        where caja.UserId == int.Parse(userIdClaim)
-                                        select movimiento;
+            if (userIdClaim == null) {
+                return BadRequest("problema con el token, no puedo descifrar el userid");
+            }
 
-            var elements = movimientosPorUsuario.OrderBy( u  => u.Fecha)
-                                        .Skip(first-1)
-                                        .Take(range)
-                                        .ToList();
-
-                 Thread.Sleep(5000);
-
-
-
-
-
-
-
-            getMovResult res = new getMovResult();
-            res.cantidadMovs = movimientosPorUsuario.Count();
-            if (elements.Any())
+            try
             {
-                res.movs = elements;
-                if (elements.OrderBy( e => e.Fecha).Last() == movimientosPorUsuario.OrderBy(e => e.Fecha).Last())
+                var movimientosPorUsuario = from movimiento in _context.Movimientos
+                                                        join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
+                                                        where caja.UserId == int.Parse(userIdClaim)
+                                                        select movimiento;
+
+                var elements = movimientosPorUsuario.OrderBy( u  => u.Fecha)
+                                                    .Skip(first-1)
+                                                    .Take(range)
+                                                    .ToList();
+
+                getMovResult res = new getMovResult();
+                res.cantidadMovs = movimientosPorUsuario.Count();
+                if (elements.Any())
                 {
-                    res.siguiente = false;
-                } else
-                {
-                    res.siguiente = true;   
+                    res.movs = elements;
+                    if (elements.OrderBy(e => e.Fecha).Last() == movimientosPorUsuario.OrderBy(e => e.Fecha).Last())
+                    {
+                        res.siguiente = false;
+                    }
+                    else
+                    {
+                        res.siguiente = true;
+                    }
+                    return res;
                 }
-                return res;
-            } else
-            {
-                res.movs = Enumerable.Empty<Movimiento>();
-                res.siguiente = false;
-                return res;
+                else
+                {
+                    res.movs = Enumerable.Empty<Movimiento>();
+                    res.siguiente = false;
+                    return res;
+                }
 
-
+            } catch(Exception ex) {
+                Console.WriteLine($"Se produjo una excepción: {ex.Message} - No se pudo eliminar el usuario");
+                return BadRequest(ex);
             }
         }
         
-        [HttpGet]
-        [Authorize]
-        public IEnumerable<Movimiento> Get()
-        {
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-            Debug.WriteLine("recibi el token = " + token);
+        //[HttpGet]
+        //[Authorize]
+        //public IEnumerable<Movimiento> Get()
+        //{
+        //    var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+        //    Debug.WriteLine("recibi el token = " + token);
 
-            // Decodifica el token JWT
-            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadJwtToken(token);
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            Debug.WriteLine("user id = " + userIdClaim);
+        //    // Decodifica el token JWT
+        //    var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        //    var jwtToken = tokenHandler.ReadJwtToken(token);
+        //    var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+        //    Debug.WriteLine("user id = " + userIdClaim);
 
 
-            var movimientosPorUsuario = from movimiento in _context.Movimientos
-                                        join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
-                                        where caja.UserId == int.Parse(userIdClaim)
-                                        select movimiento;
-            //Debug.WriteLine("empezo el delay");
-            //Thread.Sleep(10000);
-            //Debug.WriteLine("fin del delay");
-            return movimientosPorUsuario;
+        //    var movimientosPorUsuario = from movimiento in _context.Movimientos
+        //                                join caja in _context.Cajas on movimiento.IdCaja equals caja.Id
+        //                                where caja.UserId == int.Parse(userIdClaim)
+        //                                select movimiento;
+        //    //Debug.WriteLine("empezo el delay");
+        //    //Thread.Sleep(10000);
+        //    //Debug.WriteLine("fin del delay");
+        //    return movimientosPorUsuario;
 
-        }
+        //}
 
         private (bool , string) validacionMovimiento(Movimiento movimiento)
         {
-            Debug.WriteLine("");
-            Debug.WriteLine("numerocomodecimal = " + movimiento.Valor);
-            Debug.WriteLine("");
+
             string numeroComoCadena = movimiento.Valor.ToString();
-            Debug.WriteLine("");
-            Debug.WriteLine("numerocomocadena = " + numeroComoCadena);
-            Debug.WriteLine("");
             string[] partes = numeroComoCadena.Split(',');
+            
             if (partes.Length == 1) {
                 //tiene solo parte entera
                 if ((partes[0][0] != '-' && partes[0].Length > 8) || (partes[0][0] == '-' && partes[0].Length > 9))
@@ -168,8 +165,6 @@ namespace APIFC3.Controllers
                         _context.SaveChanges();
                         return Ok();
                     }
-
-                    
                 }
                 else
                 {
@@ -193,18 +188,18 @@ namespace APIFC3.Controllers
             {
                 var caja = _context.Cajas.FirstOrDefault(c => c.Id == movToRemove.IdCaja);
 
-
                 if (caja != null)
                 {
-
                     decimal saldoResultante = caja.Saldo - movToRemove.Valor;
 
-                    if (saldoResultante > 99999999.99m || saldoResultante < 0)
+                    if (saldoResultante > 99999999.99m)
                     {
-                        return UnprocessableEntity("saldo_caja_inconsistente");
+                        return UnprocessableEntity("saldo_caja_inconsistente_max");
                     }
-                    else
+                    else if (saldoResultante < 0)
                     {
+                        return UnprocessableEntity("saldo_caja_inconsistente_min");
+                    } else {
                         if (movToRemove.Concepto == "Saldo inicial")
                         {
                             caja.Saldo -= movToRemove.Valor;
@@ -227,7 +222,7 @@ namespace APIFC3.Controllers
                 }
             } else
             {
-                return Conflict();
+                return Conflict("Movimiento no encontrado");
             }
         }
 
