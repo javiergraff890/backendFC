@@ -25,15 +25,11 @@ namespace APIFC3.Controllers
         public IEnumerable<Caja> Get()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-            Debug.WriteLine("recibi el token = " + token);
 
             // Decodifica el token JWT
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.ReadJwtToken(token);
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            Debug.WriteLine("user id = " + userIdClaim);
-
-            Thread.Sleep(5000);
 
             if (userIdClaim != null)
             {
@@ -45,16 +41,16 @@ namespace APIFC3.Controllers
             
         }
 
-        [HttpGet("{id}")]
-        [Authorize]
-        public ActionResult<Caja> GetById(int id)
-        {
-            var caja = _context.Cajas.Find(id);
+        //[HttpGet("{id}")]
+        //[Authorize]
+        //public ActionResult<Caja> GetById(int id)
+        //{
+        //    var caja = _context.Cajas.Find(id);
             
-            if (caja is null)
-                return NotFound();
-            return Ok(caja);
-        }
+        //    if (caja is null)
+        //        return NotFound();
+        //    return Ok(caja);
+        //}
 
         [HttpDelete("{id}")]
         [Authorize]
@@ -65,24 +61,27 @@ namespace APIFC3.Controllers
             //si quiero eliminar una caja debo eliminar a todos los movimientos
             if (caja != null)
             {
-                IQueryable<Movimiento> movs = _context.Movimientos.Where(m => m.IdCaja == caja.Id);
-                _context.Movimientos.RemoveRange(movs);
-                _context.SaveChanges();
-                _context.Cajas.Remove(caja);
-                _context.SaveChanges();
-                return Ok();
+                try
+                {
+                    IQueryable<Movimiento> movs = _context.Movimientos.Where(m => m.IdCaja == caja.Id);
+                    _context.Movimientos.RemoveRange(movs);
+                    _context.SaveChanges();
+                    _context.Cajas.Remove(caja);
+                    _context.SaveChanges();
+                    return Ok();
+                } catch( Exception ex)
+                {
+                    return StatusCode(500, ex.Message+" se intento eliminar pero no se pudo");
+                }
+               
             } else
             {
-                return NoContent();
+                return BadRequest("No existe esa caja");
             }
         }
 
         private bool validarCaja(Caja caja)
         {
-            Debug.WriteLine("");
-            Debug.WriteLine(caja.Nombre.Length);
-            Debug.WriteLine("");
-
 
             if (caja.Nombre.Length > 100) {
                 return false;
@@ -99,10 +98,9 @@ namespace APIFC3.Controllers
         [Authorize]
         public ActionResult NuevaCaja(CreacionCaja caja)
         {
-            Debug.WriteLine("llegue a entrar a nueva caja");
             if (!validarCaja(caja.caja))
             {
-                return UnprocessableEntity("saldo_negativo");
+                return UnprocessableEntity();
             } else
             {
                 int entidadesAfectadas = 0;
@@ -115,7 +113,6 @@ namespace APIFC3.Controllers
                     }
                     catch (DbUpdateException ex)
                     {
-                        Debug.WriteLine("capture la excepcion ->>>" + ex.Message);
                         var innerException = ex.InnerException;
                         if (innerException is SqlException sqlException)
                         {
@@ -137,16 +134,15 @@ namespace APIFC3.Controllers
                     m.Fecha = caja.Fecha;
                     _context.Movimientos.Add(m);
                     entidadesAfectadas += _context.SaveChanges();
-                    Debug.WriteLine(entidadesAfectadas);
                     return Ok();
                 }
                 catch (Exception e)
                 {
                     string mensaje = "";
                     if (entidadesAfectadas == 0)
-                        mensaje = "No se inserto ningun elemento";
+                        mensaje = "No se inserto ningun elemento "+e;
                     else if (entidadesAfectadas == 1)
-                        mensaje = "no se pudo insertar el movimiento inicial";
+                        mensaje = "no se pudo insertar el movimiento inicial "+e;
 
                     return StatusCode(500, "Error interno del servidor : " + mensaje);
                 }
