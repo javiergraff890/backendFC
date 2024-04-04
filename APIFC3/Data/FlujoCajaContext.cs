@@ -23,12 +23,12 @@ public partial class FlujoCajaContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
-        IConfiguration configuration = builder.Build();
-        optionsBuilder.UseSqlServer(configuration.GetConnectionString("flujoCajaString"));
-    }
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
+    //    IConfiguration configuration = builder.Build();
+    //    optionsBuilder.UseSqlServer(configuration.GetConnectionString("flujoCajaString"));
+    //}
        
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
